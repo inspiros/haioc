@@ -77,9 +77,9 @@ def _tensors_match(a: Tensor, b: Tensor, strict: bool = True):
     return False
 
 
-def main(n_trials=100):
-    data = torch.randperm(700 * 99).sub_(700 * 99 // 2).view(700, 99).int()
-    xs = torch.arange(0, 500).int()
+def main(n_trials=100, device='cpu'):
+    data = torch.randperm(700 * 99).sub_(700 * 99 // 2).view(700, 99).int().to(device)
+    xs = torch.arange(0, 500).int().to(device)
 
     # warmup if using jit scripting:
     if isinstance(preprocess_python, torch.jit.ScriptFunction):
