@@ -1,4 +1,4 @@
-haioc ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/inspiros/haioc/build_wheels.yaml) ![GitHub](https://img.shields.io/github/license/inspiros/haioc) ![haioc](https://img.shields.io/badge/%C4%91mm-h%E1%BB%8Dc%20v%E1%BB%ABa%20th%C3%B4i-red)
+haioc ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/inspiros/haioc/build_wheels.yml) ![GitHub](https://img.shields.io/github/license/inspiros/haioc) ![haioc](https://img.shields.io/badge/%C4%91mm-h%E1%BB%8Dc%20v%E1%BB%ABa%20th%C3%B4i-red)
 ======
 
 This repo contains a small PyTorch's C++/Cuda extension of operations requested by [Hải](https://github.com/hocdot).
