@@ -4,18 +4,25 @@ haioc ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/s
 This repo contains a small PyTorch's C++/Cuda extension of operations requested by [Hải](https://github.com/hocdot).
 Current list of implemented operations:
 
-| Name             | Differentiable |
-|:-----------------|:--------------:|
-| `any_eq_any`     |       ❌        |
-| `fill_if_eq_any` |       ❌        |
+| Name             | `torch.jit.script`-able | Differentiable |
+|:-----------------|:-----------------------:|:--------------:|
+| `any_eq_any`     |            ✔            |       ❌        |
+| `fill_if_eq_any` |            ✔            |       ❌        |
 
 ## Installation
 
 #### From prebuilt wheels
 
-Check [GitHub Actions artifacts](https://github.com/inspiros/haioc/actions).
+Prebuilt wheels are automatically uploaded to **TestPyPI**.
+
+```
+pip install --index-url https://test.pypi.org/simple/ haioc
+```
+
+Also, check [GitHub Actions artifacts](https://github.com/inspiros/haioc/actions).
 
 #### From source
+
 To install globally, clone this repo and run:
 
 ```
