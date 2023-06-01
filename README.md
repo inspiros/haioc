@@ -13,7 +13,7 @@ Current list of implemented operations:
 
 #### From prebuilt wheels
 
-Prebuilt wheels are automatically uploaded to **TestPyPI**.
+Prebuilt wheels are automatically uploaded to [**TestPyPI**](https://test.pypi.org/project/haioc):
 
 ```
 pip install --index-url https://test.pypi.org/simple/ haioc
