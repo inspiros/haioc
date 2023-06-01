@@ -32,6 +32,13 @@ namespace haioc {
                     const at::Tensor &other,
                     const double fill_value,
                     const bool inplace) {
+                at::CheckedFrom c = "any_eq_any_forward";
+                auto args = {
+                        at::TensorArg(input, "input", 1),
+                        at::TensorArg(other, "other", 2)};
+                at::checkAllSameType(c, args);
+                at::checkAllSameGPU(c, args);
+
                 at::cuda::CUDAGuard device_guard(input.get_device());
                 const int64_t n_kernels = input.numel();
                 at::Tensor output;

@@ -10,6 +10,7 @@ __all__ = [
 
 def any_eq_any(input: Tensor, other: Tensor) -> Tensor:
     r"""
+    Tests if any row of :attr:`input` is equal to any element of :attr:`other`.
 
     Arguments:
         input (tensor): 2D input tensor of shape (batch_size, in_features).

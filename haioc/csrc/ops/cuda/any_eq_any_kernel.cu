@@ -33,6 +33,13 @@ namespace haioc {
             at::Tensor any_eq_any_forward_kernel(
                     const at::Tensor &input,
                     const at::Tensor &other) {
+                at::CheckedFrom c = "any_eq_any_forward";
+                auto args = {
+                        at::TensorArg(input, "input", 1),
+                        at::TensorArg(other, "other", 2)};
+                at::checkAllSameType(c, args);
+                at::checkAllSameGPU(c, args);
+
                 TORCH_CHECK(input.ndimension() > 1,
                             "input must be Nd tensor with N > 1. Got input.ndimension() = ",
                             input.ndimension())

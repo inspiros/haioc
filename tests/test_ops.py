@@ -1,10 +1,11 @@
 import torch
+
 import haioc
 
 
 def main():
-    data = torch.randperm(700 * 99).sub_(700 * 99 // 2).view(700, 99).int()
-    xs = torch.arange(0, 500).int()
+    data = torch.randperm(70 * 10).sub_(70 * 10 // 2).view(70, 10).float()
+    xs = torch.arange(0, 50).float()
 
     output = haioc.ops.any_eq_any(data, xs)
     print(output)
