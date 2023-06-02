@@ -13,10 +13,10 @@ namespace haioc {
 
             template<typename scalar_t, typename index_t>
             static __global__ void fill_if_eq_any_forward_kernel_impl(
-                    const at::GenericPackedTensorAccessor<scalar_t, 1> input,
+                    const at::GenericPackedTensorAccessor<scalar_t, 1, at::DefaultPtrTraits, index_t> input,
                     const at::GenericPackedTensorAccessor<scalar_t, 1, at::RestrictPtrTraits, index_t> other,
                     scalar_t fill_value,
-                    at::GenericPackedTensorAccessor<scalar_t, 1> output) {
+                    at::GenericPackedTensorAccessor<scalar_t, 1, at::DefaultPtrTraits, index_t> output) {
                 CUDA_1D_KERNEL_LOOP_T(i, input.size(0), index_t) {
                     for (index_t j = 0; j < other.size(0); j++) {
                         if (input[i] == other[j]) {
@@ -57,9 +57,10 @@ namespace haioc {
                 AT_DISPATCH_ALL_TYPES(
                         input.scalar_type(), "fill_if_eq_any_forward_cuda", ([&] {
                     HAIOC_DISPATCH_INDEX_TYPE(n_kernels, ([&] {
-                        auto output_accessor = output_flatten.generic_packed_accessor<scalar_t, 1>();
+                        auto output_accessor =
+                                output_flatten.generic_packed_accessor<scalar_t, 1, at::DefaultPtrTraits, index_t>();
                         fill_if_eq_any_forward_kernel_impl<scalar_t, index_t><<<blocks, threads>>>(
-                                input_flatten.generic_packed_accessor<scalar_t, 1>(),
+                                input_flatten.generic_packed_accessor<scalar_t, 1, at::DefaultPtrTraits, index_t>(),
                                 other_flatten.generic_packed_accessor<scalar_t, 1, at::RestrictPtrTraits, index_t>(),
                                 static_cast<scalar_t>(fill_value),
                                 output_accessor);
