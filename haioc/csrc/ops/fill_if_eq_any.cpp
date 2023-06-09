@@ -7,7 +7,7 @@ namespace haioc {
         at::Tensor fill_if_eq_any(
                 at::Tensor &input,
                 const at::Tensor &other,
-                const double fill_value = 0.,
+                const at::Scalar &fill_value,
                 const bool inplace = false) {
             if (inplace && input.is_leaf() && input.requires_grad())
                 TORCH_CHECK(0, "a leaf Variable that requires grad is "
@@ -40,7 +40,7 @@ namespace haioc {
 
         TORCH_LIBRARY_FRAGMENT(haioc, m) {
             m.def(TORCH_SELECTIVE_SCHEMA(
-                          "haioc::fill_if_eq_any(Tensor input, Tensor other, float fill_value, bool inplace) -> Tensor")
+                          "haioc::fill_if_eq_any(Tensor input, Tensor other, Scalar fill_value, bool inplace = False) -> Tensor")
             );
             m.def(TORCH_SELECTIVE_SCHEMA(
                           "haioc::_fill_if_eq_any_backward(Tensor grad_output, Tensor input, Tensor other) -> Tensor")

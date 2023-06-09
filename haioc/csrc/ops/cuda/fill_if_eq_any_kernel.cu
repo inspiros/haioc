@@ -30,7 +30,7 @@ namespace haioc {
             at::Tensor fill_if_eq_any_forward_kernel(
                     at::Tensor &input,
                     const at::Tensor &other,
-                    const double fill_value,
+                    const at::Scalar &fill_value,
                     const bool inplace) {
                 at::CheckedFrom c = "any_eq_any_forward";
                 auto args = {
@@ -62,7 +62,7 @@ namespace haioc {
                         fill_if_eq_any_kernel_impl<scalar_t, index_t><<<blocks, threads>>>(
                                 input_flatten.generic_packed_accessor<scalar_t, 1, at::DefaultPtrTraits, index_t>(),
                                 other_flatten.generic_packed_accessor<scalar_t, 1, at::RestrictPtrTraits, index_t>(),
-                                static_cast<scalar_t>(fill_value),
+                                fill_value.to<scalar_t>(),
                                 output_accessor);
                     }));
                 }));

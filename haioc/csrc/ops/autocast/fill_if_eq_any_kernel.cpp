@@ -9,7 +9,7 @@ namespace haioc {
             at::Tensor fill_if_eq_any_autocast(
                     at::Tensor &input,
                     const at::Tensor &other,
-                    const double fill_value,
+                    const at::Scalar &fill_value,
                     const bool inplace) {
                 c10::impl::ExcludeDispatchKeyGuard no_autocast(c10::DispatchKey::Autocast);
                 return fill_if_eq_any(

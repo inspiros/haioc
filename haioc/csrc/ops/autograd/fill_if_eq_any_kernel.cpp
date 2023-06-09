@@ -13,7 +13,7 @@ namespace haioc {
                         torch::autograd::AutogradContext *ctx,
                         torch::autograd::Variable &input,
                         const torch::autograd::Variable &other,
-                        const double fill_value,
+                        const torch::Scalar &fill_value,
                         const bool inplace) {
                     at::AutoDispatchBelowADInplaceOrView g;
                     auto output = fill_if_eq_any(
@@ -54,7 +54,7 @@ namespace haioc {
         at::Tensor fill_if_eq_any_autograd(
                 at::Tensor &input,
                 const at::Tensor &other,
-                const double fill_value,
+                const torch::Scalar &fill_value,
                 const bool inplace) {
             return FillIfEqAnyFunction::apply(
                     input,
