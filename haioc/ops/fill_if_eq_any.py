@@ -23,4 +23,4 @@ def fill_if_eq_any(input: Tensor,
         inplace (bool): modify :attr:`input` or not. Defaults to ``False``.
     """
     _assert_has_ops()
-    return torch.ops.haioc.fill_if_eq_any(input, other, fill_value, inplace)
+    return torch.ops.haioc.fill_if_eq_any(input, other, float(fill_value), inplace)

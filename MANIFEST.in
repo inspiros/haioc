@@ -1,0 +1,5 @@
+recursive-include haioc *.cpp
+recursive-include haioc *.cu
+include README.md
+include LICENSE.txt
+include requirements*.txt

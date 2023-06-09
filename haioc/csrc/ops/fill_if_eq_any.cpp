@@ -9,6 +9,9 @@ namespace haioc {
                 const at::Tensor &other,
                 const double fill_value = 0.,
                 const bool inplace = false) {
+            if (inplace && input.is_leaf() && input.requires_grad())
+                TORCH_CHECK(0, "a leaf Variable that requires grad is "
+                               "being used in an in-place operation.")
             static auto op = c10::Dispatcher::singleton()
                     .findSchemaOrThrow("haioc::fill_if_eq_any", "")
                     .typed<decltype(fill_if_eq_any)>();
@@ -19,9 +22,28 @@ namespace haioc {
                     inplace);
         }
 
+        namespace detail {
+            at::Tensor _fill_if_eq_any_backward(
+                    const at::Tensor &grad_output,
+                    const at::Tensor &input,
+                    const at::Tensor &other) {
+                static auto op =
+                        c10::Dispatcher::singleton()
+                                .findSchemaOrThrow("haioc::_fill_if_eq_any_backward", "")
+                                .typed<decltype(_fill_if_eq_any_backward)>();
+                return op.call(
+                        grad_output,
+                        input,
+                        other);
+            }
+        }
+
         TORCH_LIBRARY_FRAGMENT(haioc, m) {
             m.def(TORCH_SELECTIVE_SCHEMA(
                           "haioc::fill_if_eq_any(Tensor input, Tensor other, float fill_value, bool inplace) -> Tensor")
+            );
+            m.def(TORCH_SELECTIVE_SCHEMA(
+                          "haioc::_fill_if_eq_any_backward(Tensor grad_output, Tensor input, Tensor other) -> Tensor")
             );
         }
     } // namespace ops

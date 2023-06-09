@@ -7,7 +7,7 @@ Current list of implemented operations:
 | Name             | `torch.jit.script`-able | Differentiable |
 |:-----------------|:-----------------------:|:--------------:|
 | `any_eq_any`     |            ✔            |       ❌        |
-| `fill_if_eq_any` |            ✔            |       ❌        |
+| `fill_if_eq_any` |            ✔            |       ✔        |
 
 ## Installation
 

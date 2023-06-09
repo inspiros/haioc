@@ -22,6 +22,8 @@ namespace haioc {
                             fill_value,
                             inplace);
 
+                    ctx->save_for_backward({input, other});
+
                     return {
                             output,
                     };
@@ -30,7 +32,21 @@ namespace haioc {
                 static torch::autograd::variable_list backward(
                         torch::autograd::AutogradContext *ctx,
                         const torch::autograd::variable_list &grad_output) {
-                    TORCH_CHECK(0, "backwards on fill_if_eq_any not supported")
+                    auto saved = ctx->get_saved_variables();
+                    auto input = saved[0];
+                    auto other = saved[1];
+
+                    auto grad_input = detail::_fill_if_eq_any_backward(
+                            grad_output[0],
+                            input,
+                            other);
+
+                    return {
+                            grad_input,
+                            torch::autograd::Variable(),
+                            torch::autograd::Variable(),
+                            torch::autograd::Variable(),
+                    };
                 }
             };
         } // namespace
