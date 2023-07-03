@@ -9,9 +9,6 @@ namespace haioc {
                 const at::Tensor &other,
                 const at::Scalar &fill_value,
                 const bool inplace = false) {
-            if (inplace && input.is_leaf() && input.requires_grad())
-                TORCH_CHECK(0, "a leaf Variable that requires grad is "
-                               "being used in an in-place operation.")
             static auto op = c10::Dispatcher::singleton()
                     .findSchemaOrThrow("haioc::fill_if_eq_any", "")
                     .typed<decltype(fill_if_eq_any)>();

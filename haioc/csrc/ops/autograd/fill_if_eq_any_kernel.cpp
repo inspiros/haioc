@@ -16,13 +16,17 @@ namespace haioc {
                         const torch::Scalar &fill_value,
                         const bool inplace) {
                     at::AutoDispatchBelowADInplaceOrView g;
+
+                    if (inplace)
+                        ctx->mark_dirty({input});
+                    ctx->save_for_backward({inplace ? input.clone() : input,
+                                            other});
+
                     auto output = fill_if_eq_any(
                             input,
                             other,
                             fill_value,
                             inplace);
-
-                    ctx->save_for_backward({input, other});
 
                     return {
                             output,
