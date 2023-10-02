@@ -8,6 +8,7 @@ Current list of implemented operations:
 |:-----------------|:-----------------------:|:--------------:|
 | `any_eq_any`     |            ✔            |       ❌        |
 | `fill_if_eq_any` |            ✔            |       ✔        |
+| `cdist`          |            ✔            |       ❌        |
 
 ## Installation
 
@@ -41,7 +42,6 @@ python setup.py build_ext --inplace
 
 ```python
 import torch
-
 import haioc
 
 data = torch.randperm(700 * 99).sub_(700 * 99 // 2).view(700, 99).int()
@@ -51,7 +51,21 @@ delete_mask = haioc.any_eq_any(data, xs)
 zero_mask = haioc.fill_if_eq_any(data, -xs, 0.)
 ```
 
-Do check [`tests/test_haioc.py`](tests/test_haioc.py).
+See more in [`tests/test_preprocess.py`](tests/test_preprocess.py).
+
+### Example of `cdist`:
+
+```python
+import torch
+import haioc
+
+x1 = torch.rand(30, 128)
+x2 = torch.rand(40, 128)
+
+dist = haioc.cdist(x1, x2, p=2)
+```
+
+See more in [`tests/test_cdist.py`](tests/test_cdist.py).
 
 ## License
 

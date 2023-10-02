@@ -21,7 +21,7 @@ namespace haioc {
 
         namespace detail {
             at::Tensor _fill_if_eq_any_backward(
-                    const at::Tensor &grad_output,
+                    const at::Tensor &grad,
                     const at::Tensor &input,
                     const at::Tensor &other) {
                 static auto op =
@@ -29,7 +29,7 @@ namespace haioc {
                                 .findSchemaOrThrow("haioc::_fill_if_eq_any_backward", "")
                                 .typed<decltype(_fill_if_eq_any_backward)>();
                 return op.call(
-                        grad_output,
+                        grad,
                         input,
                         other);
             }
@@ -40,7 +40,7 @@ namespace haioc {
                           "haioc::fill_if_eq_any(Tensor input, Tensor other, Scalar fill_value, bool inplace = False) -> Tensor")
             );
             m.def(TORCH_SELECTIVE_SCHEMA(
-                          "haioc::_fill_if_eq_any_backward(Tensor grad_output, Tensor input, Tensor other) -> Tensor")
+                          "haioc::_fill_if_eq_any_backward(Tensor grad, Tensor input, Tensor other) -> Tensor")
             );
         }
     } // namespace ops

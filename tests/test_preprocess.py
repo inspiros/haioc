@@ -1,11 +1,9 @@
-import math
-import time
-
 import torch
 from torch import Tensor
 from tqdm import trange
 
 import haioc
+from test_utils import TimeMeter
 
 
 @torch.jit.script
@@ -43,29 +41,6 @@ def preprocess_c(data: Tensor, xs: Tensor, inplace: bool = False) -> Tensor:
     data = data[haioc.any_eq_any(data, xs).logical_not_()]
     data = haioc.fill_if_eq_any(data, -xs, 0., inplace)
     return data
-
-
-class TimeMeter:
-    def __init__(self):
-        self.avg = self.count = 0
-        self.start = self.end = None
-
-    def __enter__(self):
-        self.start = time.time()
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.end = time.time()
-        elapsed_time = self.end - self.start
-        self.avg = (self.avg * self.count + elapsed_time) / (self.count + 1)
-        self.count += 1
-
-    def reset(self):
-        self.avg = self.count = 0
-        self.start = self.end = None
-
-    @property
-    def fps(self):
-        return 1. / self.avg if self.avg else math.nan
 
 
 def _tensors_match(a: Tensor, b: Tensor, strict: bool = True):

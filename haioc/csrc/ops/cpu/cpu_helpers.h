@@ -1,8 +1,15 @@
 #pragma once
 #include <cmath>
 
+#if defined(_MSC_VER)
 #define CPU_1D_KERNEL_LOOP_BETWEEN_T(i, start, end, index_t)      \
+__pragma(omp parallel for)                                        \
     for (index_t i = start; i < end; ++i)
+#else
+#define CPU_1D_KERNEL_LOOP_BETWEEN_T(i, start, end, index_t)      \
+_Pragma("omp parallel for")                                       \
+    for (index_t i = start; i < end; ++i)
+#endif
 
 #define CPU_1D_KERNEL_LOOP_T(i, n, index_t)     \
     CPU_1D_KERNEL_LOOP_BETWEEN_T(i, 0, n, index_t)
@@ -18,5 +25,9 @@
 #define __forceinline__ inline
 #endif
 
+using std::abs;
 using std::min;
 using std::max;
+using std::ceil;
+using std::floor;
+using std::pow;

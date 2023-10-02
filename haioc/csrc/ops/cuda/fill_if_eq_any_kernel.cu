@@ -7,7 +7,7 @@
 namespace haioc {
     namespace ops {
         namespace {
-            inline unsigned int GET_THREADS() {
+            constexpr unsigned int GET_THREADS() {
                 return 1024;
             }
 

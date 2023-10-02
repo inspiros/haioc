@@ -68,6 +68,13 @@ def get_extensions():
         define_macros += [('USE_PYTHON', None)]
         extra_compile_args['cxx'].append('/MP')
 
+    # enable openmp
+    if sys.platform == 'darwin':
+        extra_compile_args['cxx'].append('-Xpreprocessor')
+    extra_compile_args['cxx'].append('/openmp' if sys.platform == 'win32' else '-fopenmp')
+    if sys.platform == 'darwin':
+        extra_compile_args['cxx'].append('-lomp')
+
     if debug_mode:
         print('Compiling in debug mode')
         extra_compile_args['cxx'].append('-g')
@@ -97,7 +104,7 @@ def setup_package():
         version=get_version(),
         ext_modules=get_extensions(),
         cmdclass={
-            'build_ext': torch.utils.cpp_extension.BuildExtension.with_options(use_ninja=False)
+            'build_ext': torch.utils.cpp_extension.BuildExtension
         },
     )
 
