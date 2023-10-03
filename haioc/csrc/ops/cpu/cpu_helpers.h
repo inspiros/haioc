@@ -25,9 +25,9 @@ _Pragma("omp parallel for")                                       \
 #define __forceinline__ inline
 #endif
 
-using std::abs;
 using std::min;
 using std::max;
 using std::ceil;
 using std::floor;
+using std::fabs;
 using std::pow;

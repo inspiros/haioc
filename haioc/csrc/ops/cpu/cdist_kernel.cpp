@@ -8,7 +8,7 @@
 namespace haioc {
     namespace ops {
         namespace {
-            template<bool renorm = true, typename scalar_t, typename index_t>
+            template<bool backward = false, typename scalar_t, typename index_t>
             static void cdist_kernel_impl(
                     index_t n_kernels,
                     const at::TensorAccessor<scalar_t, 3> x1,
@@ -16,23 +16,22 @@ namespace haioc {
                     scalar_t p,
                     at::TensorAccessor<scalar_t, 3> output) {
                 scalar_t r_p = 1 / p;
+                if constexpr (backward)
+                    r_p -= 1;
                 CPU_1D_KERNEL_LOOP_T(index, n_kernels, index_t) {
                     const index_t j = index % x2.size(1);
                     const index_t i = (index / x2.size(1)) % x1.size(1);
                     const index_t b = index / (x2.size(1) * x1.size(1));
 
                     scalar_t val = 0;
-                    for (index_t k = 0; k < x1.size(2); k++) {
-                        val += pow(abs(x1[b][i][k] - x2[b][j][k]), p);
-                    }
-                    if constexpr (renorm)
-                        val = pow(val, r_p);
-                    output[b][i][j] = val;
+                    for (index_t k = 0; k < x1.size(2); k++)
+                        val += pow(fabs(x1[b][i][k] - x2[b][j][k]), p);
+                    output[b][i][j] = pow(val, r_p);
                 }
             }
 
-            template<bool negative = false, typename scalar_t, typename index_t>
-            static void cdist_kernel_inf_impl(
+            template<bool neg = false, typename scalar_t, typename index_t>
+            static void cdist_inf_kernel_impl(
                     int64_t n_kernels,
                     const at::TensorAccessor<scalar_t, 3> x1,
                     const at::TensorAccessor<scalar_t, 3> x2,
@@ -42,10 +41,10 @@ namespace haioc {
                     index_t i = (index / x2.size(1)) % x1.size(1);
                     index_t b = index / (x2.size(1) * x1.size(1));
 
-                    scalar_t val = abs(x1[b][i][0] - x2[b][j][0]), tmp;
+                    scalar_t val = fabs(x1[b][i][0] - x2[b][j][0]), tmp;
                     for (index_t k = 1; k < x1.size(2); k++) {
-                        tmp = abs(x1[b][i][k] - x2[b][j][k]);
-                        if constexpr (negative) {
+                        tmp = fabs(x1[b][i][k] - x2[b][j][k]);
+                        if constexpr (neg) {
                             if (tmp < val)
                                 val = tmp;
                         } else {
@@ -92,21 +91,21 @@ namespace haioc {
                 if (p == 0) {
                     output.fill_(x1_c.size(2));
                 } else {
-                    AT_DISPATCH_FLOATING_TYPES(
+                    AT_DISPATCH_FLOATING_TYPES_AND2(at::kHalf, at::kBFloat16,
                             x1_c.scalar_type(), "cdist_forward_cpu", ([&] {
                         HAIOC_DISPATCH_INDEX_TYPE(n_kernels, ([&] {
                             auto output_accessor =
                                     output.accessor<scalar_t, 3>();
                             if (std::isinf(p)) {
                                 HAIOC_DISPATCH_BOOL_NAME(negative, p < 0, ([&] {
-                                    cdist_kernel_inf_impl<negative, scalar_t, index_t>(
+                                    cdist_inf_kernel_impl<negative, scalar_t, index_t>(
                                             n_kernels,
                                             x1_c.accessor<scalar_t, 3>(),
                                             x2_c.accessor<scalar_t, 3>(),
                                             output_accessor);
                                 }));
                             } else {
-                                cdist_kernel_impl<true, scalar_t, index_t>(
+                                cdist_kernel_impl<false, scalar_t, index_t>(
                                         n_kernels,
                                         x1_c.accessor<scalar_t, 3>(),
                                         x2_c.accessor<scalar_t, 3>(),
@@ -130,7 +129,7 @@ namespace haioc {
                     const at::TensorAccessor<scalar_t, 3> x2,
                     scalar_t p,
                     at::TensorAccessor<scalar_t, 3> grad_x1) {
-                scalar_t r_p = 1 / p;
+                scalar_t p_minus_1 = p - 1;
                 CPU_1D_KERNEL_LOOP_T(index, n_kernels, index_t) {
                     const index_t i = index % x1.size(1);
                     const index_t b = index / x1.size(1);
@@ -140,7 +139,7 @@ namespace haioc {
                         for (index_t k = 0; k < x1.size(2); k++) {
                             val = x1[b][i][k] - x2[b][j][k];
                             grad_x1[b][i][k] += grad_output[b][i][j] *
-                                                pow(abs(val), p - 1) / output[b][i][j] * utils::signum(val);
+                                                pow(fabs(val), p_minus_1) * output[b][i][j] * utils::signum(val);
                         }
                     }
                 }
@@ -155,7 +154,7 @@ namespace haioc {
                     const at::TensorAccessor<scalar_t, 3> x2,
                     scalar_t p,
                     at::TensorAccessor<scalar_t, 3> grad_x2) {
-                scalar_t r_p = 1 / p;
+                scalar_t p_minus_1 = p - 1;
                 CPU_1D_KERNEL_LOOP_T(index, n_kernels, index_t) {
                     const index_t j = index % x2.size(1);
                     const index_t b = index / x2.size(1);
@@ -165,9 +164,48 @@ namespace haioc {
                         for (index_t k = 0; k < x1.size(2); k++) {
                             val = x2[b][j][k] - x1[b][i][k];
                             grad_x2[b][j][k] += grad_output[b][i][j] *
-                                                pow(abs(val), p - 1) / output[b][i][j] * utils::signum(val);
+                                                pow(fabs(val), p_minus_1) * output[b][i][j] * utils::signum(val);
                         }
                     }
+                }
+            }
+
+            template<bool neg = false, typename scalar_t, typename index_t>
+            static void cdist_inf_backward_kernel_impl(
+                    int64_t n_kernels,
+                    const at::TensorAccessor<scalar_t, 3> grad_output,
+                    const at::TensorAccessor<scalar_t, 3> x1,
+                    const at::TensorAccessor<scalar_t, 3> x2,
+                    at::TensorAccessor<scalar_t, 3> grad_x1,
+                    at::TensorAccessor<scalar_t, 3> grad_x2) {
+                CPU_1D_KERNEL_LOOP_T(index, n_kernels, index_t) {
+                    index_t j = index % x2.size(1);
+                    index_t i = (index / x2.size(1)) % x1.size(1);
+                    index_t b = index / (x2.size(1) * x1.size(1));
+
+                    scalar_t val = x1[b][i][0] - x2[b][j][0], fabs_val = fabs(val);
+                    scalar_t tmp, fabs_tmp;
+                    index_t val_k = 0;
+                    for (index_t k = 1; k < x1.size(2); k++) {
+                        tmp = x1[b][i][k] - x2[b][j][k];
+                        fabs_tmp = fabs(tmp);
+                        if constexpr (neg) {
+                            if (fabs_tmp < fabs_val) {
+                                val = tmp;
+                                fabs_val = fabs_tmp;
+                                val_k = k;
+                            }
+                        } else {
+                            if (fabs_tmp > fabs_val) {
+                                val = tmp;
+                                fabs_val = fabs_tmp;
+                                val_k = k;
+                            }
+                        }
+                    }
+                    scalar_t sgn_val = utils::signum(val);
+                    grad_x1[b][i][val_k] += grad_output[b][i][j] * sgn_val;
+                    grad_x2[b][j][val_k] += grad_output[b][i][j] * -sgn_val;
                 }
             }
 
@@ -176,7 +214,6 @@ namespace haioc {
                     const at::Tensor &x1,
                     const at::Tensor &x2,
                     double p) {
-                TORCH_WARN_ONCE("cdist_backward not working yet.")
                 bool unbatched = x1.ndimension() == 2;
 
                 auto grad_output_c = grad_output.contiguous();
@@ -194,7 +231,7 @@ namespace haioc {
                 auto grad_x2 = at::zeros_like(x2_c);
 
                 if (p != 0) {
-                    AT_DISPATCH_FLOATING_TYPES(
+                    AT_DISPATCH_FLOATING_TYPES_AND2(at::kHalf, at::kBFloat16,
                             grad_output_c.scalar_type(), "cdist_backward_cpu", ([&] {
                         if (std::isinf(p)) {
                             n_kernels = grad_output_c.numel();
@@ -205,14 +242,13 @@ namespace haioc {
                                             grad_x1.accessor<scalar_t, 3>();
                                     auto grad_x2_accessor =
                                             grad_x2.accessor<scalar_t, 3>();
-                                    TORCH_CHECK_NOT_IMPLEMENTED(true, "")
-//                                    cdist_backward_kernel_inf_impl<negative, scalar_t, index_t>(
-//                                            n_kernels,
-//                                            grad_output_c.accessor<scalar_t, 3>(),
-//                                            x1_c.accessor<scalar_t, 3>(),
-//                                            x2_c.accessor<scalar_t, 3>(),
-//                                            grad_x1_accessor,
-//                                            grad_x2_accessor);
+                                    cdist_inf_backward_kernel_impl<negative, scalar_t, index_t>(
+                                            n_kernels,
+                                            grad_output_c.accessor<scalar_t, 3>(),
+                                            x1_c.accessor<scalar_t, 3>(),
+                                            x2_c.accessor<scalar_t, 3>(),
+                                            grad_x1_accessor,
+                                            grad_x2_accessor);
                                 }));
                             }));
                         } else {
@@ -222,7 +258,7 @@ namespace haioc {
                             HAIOC_DISPATCH_INDEX_TYPE(n_kernels, ([&] {
                                 auto output_accessor =
                                         output.accessor<scalar_t, 3>();
-                                cdist_kernel_impl<false, scalar_t, index_t>(
+                                cdist_kernel_impl<true, scalar_t, index_t>(
                                         n_kernels,
                                         x1_c.accessor<scalar_t, 3>(),
                                         x2_c.accessor<scalar_t, 3>(),
@@ -230,7 +266,7 @@ namespace haioc {
                                         output_accessor);
                             }));
 
-                            n_kernels = batch_size * x1.size(1);
+                            n_kernels = batch_size * x1_c.size(1);
                             HAIOC_DISPATCH_INDEX_TYPE(n_kernels, ([&] {
                                 auto grad_x1_accessor =
                                         grad_x1.accessor<scalar_t, 3>();
@@ -244,7 +280,7 @@ namespace haioc {
                                         grad_x1_accessor);
                             }));
 
-                            n_kernels = batch_size * x2.size(1);
+                            n_kernels = batch_size * x2_c.size(1);
                             HAIOC_DISPATCH_INDEX_TYPE(n_kernels, ([&] {
                                 auto grad_x2_accessor =
                                         grad_x2.accessor<scalar_t, 3>();

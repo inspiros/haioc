@@ -1,14 +1,14 @@
 haioc ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/inspiros/haioc/build_wheels.yml) ![GitHub](https://img.shields.io/github/license/inspiros/haioc) ![haioc](https://img.shields.io/badge/%C4%91mm-h%E1%BB%8Dc%20v%E1%BB%ABa%20th%C3%B4i-red)
 ======
 
-This repo contains a small PyTorch's C++/Cuda extension of operations requested by [Hải](https://github.com/hocdot).
-Current list of implemented operations:
+This repo contains a small PyTorch's C++/Cuda extension of operators requested by [Hải](https://github.com/hocdot).
+Current list of implemented operators:
 
 | Name             | `torch.jit.script`-able | Differentiable |
 |:-----------------|:-----------------------:|:--------------:|
 | `any_eq_any`     |            ✔            |       ❌        |
 | `fill_if_eq_any` |            ✔            |       ✔        |
-| `cdist`          |            ✔            |       ❌        |
+| `cdist`          |            ✔            |       ✔        |
 
 ## Installation
 
@@ -38,7 +38,7 @@ python setup.py build_ext --inplace
 
 ## Usage
 
-### Example of `any_eq_any` and `fill_if_eq_any`:
+### Example of `haioc.any_eq_any` and `haioc.fill_if_eq_any`
 
 ```python
 import torch
@@ -53,7 +53,7 @@ zero_mask = haioc.fill_if_eq_any(data, -xs, 0.)
 
 See more in [`tests/test_preprocess.py`](tests/test_preprocess.py).
 
-### Example of `cdist`:
+### Example of `haioc.cdist`
 
 ```python
 import torch

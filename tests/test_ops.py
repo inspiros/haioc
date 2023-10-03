@@ -30,6 +30,14 @@ def test_fill_if_eq_any():
                                    inputs=(data,)))
 
 
+def test_signum():
+    torch.ops.haioc._test_signum(0.1, torch.bfloat16)
+    torch.ops.haioc._test_signum(0.0, torch.bfloat16)
+    torch.ops.haioc._test_signum(-0.0, torch.bfloat16)
+    torch.ops.haioc._test_signum(-0.1, torch.bfloat16)
+
+
 if __name__ == '__main__':
-    test_any_eq_any()
-    test_fill_if_eq_any()
+    # test_any_eq_any()
+    # test_fill_if_eq_any()
+    test_signum()
