@@ -18,7 +18,7 @@ namespace haioc {
                 scalar_t r_p = 1 / p;
                 if constexpr (backward)
                     r_p -= 1;
-                CPU_1D_KERNEL_LOOP_T(index, n_kernels, index_t) {
+                CPU_1D_PARALLEL_KERNEL_LOOP(index, n_kernels) {
                     const index_t j = index % x2.size(1);
                     const index_t i = (index / x2.size(1)) % x1.size(1);
                     const index_t b = index / (x2.size(1) * x1.size(1));
@@ -32,11 +32,11 @@ namespace haioc {
 
             template<bool neg = false, typename scalar_t, typename index_t>
             static void cdist_inf_kernel_impl(
-                    int64_t n_kernels,
+                    index_t n_kernels,
                     const at::TensorAccessor<scalar_t, 3> x1,
                     const at::TensorAccessor<scalar_t, 3> x2,
                     at::TensorAccessor<scalar_t, 3> output) {
-                CPU_1D_KERNEL_LOOP_T(index, n_kernels, index_t) {
+                CPU_1D_PARALLEL_KERNEL_LOOP(index, n_kernels) {
                     index_t j = index % x2.size(1);
                     index_t i = (index / x2.size(1)) % x1.size(1);
                     index_t b = index / (x2.size(1) * x1.size(1));
@@ -130,7 +130,7 @@ namespace haioc {
                     scalar_t p,
                     at::TensorAccessor<scalar_t, 3> grad_x1) {
                 scalar_t p_minus_1 = p - 1;
-                CPU_1D_KERNEL_LOOP_T(index, n_kernels, index_t) {
+                CPU_1D_PARALLEL_KERNEL_LOOP(index, n_kernels) {
                     const index_t i = index % x1.size(1);
                     const index_t b = index / x1.size(1);
 
@@ -155,7 +155,7 @@ namespace haioc {
                     scalar_t p,
                     at::TensorAccessor<scalar_t, 3> grad_x2) {
                 scalar_t p_minus_1 = p - 1;
-                CPU_1D_KERNEL_LOOP_T(index, n_kernels, index_t) {
+                CPU_1D_PARALLEL_KERNEL_LOOP(index, n_kernels) {
                     const index_t j = index % x2.size(1);
                     const index_t b = index / x2.size(1);
 
@@ -172,13 +172,13 @@ namespace haioc {
 
             template<bool neg = false, typename scalar_t, typename index_t>
             static void cdist_inf_backward_kernel_impl(
-                    int64_t n_kernels,
+                    index_t n_kernels,
                     const at::TensorAccessor<scalar_t, 3> grad_output,
                     const at::TensorAccessor<scalar_t, 3> x1,
                     const at::TensorAccessor<scalar_t, 3> x2,
                     at::TensorAccessor<scalar_t, 3> grad_x1,
                     at::TensorAccessor<scalar_t, 3> grad_x2) {
-                CPU_1D_KERNEL_LOOP_T(index, n_kernels, index_t) {
+                CPU_1D_KERNEL_LOOP(index, n_kernels) {
                     index_t j = index % x2.size(1);
                     index_t i = (index / x2.size(1)) % x1.size(1);
                     index_t b = index / (x2.size(1) * x1.size(1));

@@ -22,7 +22,7 @@ namespace haioc {
                 scalar_t r_p = 1 / p;
                 if constexpr (backward)
                     r_p -= 1;
-                CUDA_1D_KERNEL_LOOP_T(index, n_kernels, index_t) {
+                CUDA_1D_KERNEL_LOOP(index, n_kernels) {
                     const index_t j = index % x2.size(1);
                     const index_t i = (index / x2.size(1)) % x1.size(1);
                     const index_t b = index / (x2.size(1) * x1.size(1));
@@ -36,11 +36,11 @@ namespace haioc {
 
             template<bool neg = false, typename scalar_t, typename index_t>
             static __launch_bounds__(1024) __global__ void cdist_inf_kernel_impl(
-                    int64_t n_kernels,
+                    index_t n_kernels,
                     const at::GenericPackedTensorAccessor<scalar_t, 3, at::RestrictPtrTraits, index_t> x1,
                     const at::GenericPackedTensorAccessor<scalar_t, 3, at::RestrictPtrTraits, index_t> x2,
                     at::GenericPackedTensorAccessor<scalar_t, 3, at::RestrictPtrTraits, index_t> output) {
-                CUDA_1D_KERNEL_LOOP_T(index, n_kernels, index_t) {
+                CUDA_1D_KERNEL_LOOP(index, n_kernels) {
                     index_t j = index % x2.size(1);
                     index_t i = (index / x2.size(1)) % x1.size(1);
                     index_t b = index / (x2.size(1) * x1.size(1));
@@ -139,7 +139,7 @@ namespace haioc {
                     scalar_t p,
                     at::GenericPackedTensorAccessor<scalar_t, 3, at::RestrictPtrTraits, index_t> grad_x1) {
                 scalar_t p_minus_1 = p - 1;
-                CUDA_1D_KERNEL_LOOP_T(index, n_kernels, index_t) {
+                CUDA_1D_KERNEL_LOOP(index, n_kernels) {
                     const index_t i = index % x1.size(1);
                     const index_t b = index / x1.size(1);
 
@@ -164,7 +164,7 @@ namespace haioc {
                     scalar_t p,
                     at::GenericPackedTensorAccessor<scalar_t, 3, at::RestrictPtrTraits, index_t> grad_x2) {
                 scalar_t p_minus_1 = p - 1;
-                CUDA_1D_KERNEL_LOOP_T(index, n_kernels, index_t) {
+                CUDA_1D_KERNEL_LOOP(index, n_kernels) {
                     const index_t j = index % x2.size(1);
                     const index_t b = index / x2.size(1);
 
@@ -181,13 +181,13 @@ namespace haioc {
 
             template<bool neg = false, typename scalar_t, typename index_t>
             static __launch_bounds__(1024) __global__ void cdist_inf_backward_kernel_impl(
-                    int64_t n_kernels,
+                    index_t n_kernels,
                     const at::GenericPackedTensorAccessor<scalar_t, 3, at::RestrictPtrTraits, index_t> grad_output,
                     const at::GenericPackedTensorAccessor<scalar_t, 3, at::RestrictPtrTraits, index_t> x1,
                     const at::GenericPackedTensorAccessor<scalar_t, 3, at::RestrictPtrTraits, index_t> x2,
                     at::GenericPackedTensorAccessor<scalar_t, 3, at::RestrictPtrTraits, index_t> grad_x1,
                     at::GenericPackedTensorAccessor<scalar_t, 3, at::RestrictPtrTraits, index_t> grad_x2) {
-                CUDA_1D_KERNEL_LOOP_T(index, n_kernels, index_t) {
+                CUDA_1D_KERNEL_LOOP(index, n_kernels) {
                     index_t j = index % x2.size(1);
                     index_t i = (index / x2.size(1)) % x1.size(1);
                     index_t b = index / (x2.size(1) * x1.size(1));

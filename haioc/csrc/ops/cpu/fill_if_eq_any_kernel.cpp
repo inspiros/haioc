@@ -13,7 +13,7 @@ namespace haioc {
                     const at::TensorAccessor<scalar_t, 1> other,
                     scalar_t fill_value,
                     at::TensorAccessor<scalar_t, 1> output) {
-                CPU_1D_KERNEL_LOOP_T(i, input.size(0), index_t) {
+                CPU_1D_PARALLEL_KERNEL_LOOP_T(i, input.size(0), index_t) {
                     for (index_t j = 0; j < other.size(0); j++) {
                         if (input[i] == other[j]) {
                             output[i] = fill_value;

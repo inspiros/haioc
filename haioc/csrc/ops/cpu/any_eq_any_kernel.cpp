@@ -12,7 +12,7 @@ namespace haioc {
                     const at::TensorAccessor<scalar_t, 2> input,
                     const at::TensorAccessor<scalar_t, 1> other,
                     at::TensorAccessor<bool, 1> output) {
-                CPU_1D_KERNEL_LOOP_T(i, input.size(0), index_t) {
+                CPU_1D_PARALLEL_KERNEL_LOOP_T(i, input.size(0), index_t) {
                     for (index_t j = 0; j < input.size(1); j++) {
                         for (index_t k = 0; k < other.size(0); k++) {
                             if (input[i][j] == other[k]) {
@@ -40,7 +40,7 @@ namespace haioc {
                             input.ndimension())
                 const int64_t n_kernels = input.size(0);
                 at::Tensor output = at::zeros({input.size(0)},
-                                              at::TensorOptions().dtype(at::kBool).device(at::kCPU));
+                                              at::TensorOptions().dtype(at::kBool).device(input.device()));
 
                 auto input_flatten = input.flatten(1);
                 auto other_flatten = other.flatten();
